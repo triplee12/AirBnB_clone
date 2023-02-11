@@ -60,7 +60,8 @@ class HBNBCommand(cmd.Cmd):
         Returns:
             function (function): returns the function needed or error
         """
-        lst = (line.replace('(', '.').replace(',', '.').replace(' ', '').replace('.', '.')[:-1].split('.'))
+        lst = (line.replace('(', '.').replace(',', '.').replace(' ', '')
+                [:-1].split('.'))
         if len(lst) > 1:
             if lst[1] == "all":
                 return self.do_all(lst[0])
@@ -74,7 +75,8 @@ class HBNBCommand(cmd.Cmd):
             elif lst[1] == "update":
                 print(len(lst))
                 if len(lst) == 6:
-                    return self.do_update(lst[0] + ' ' + lst[2].replace('"', '') + ' ' + lst[3] + ' ' + lst[4])
+                    return self.do_update(lst[0] + ' ' + lst[2].replace('"', '')
+                            + ' ' + lst[3] + ' ' + lst[4])
                 else:
                     dct = ""
                     for i in range(3, len(lst)):
