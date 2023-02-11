@@ -4,8 +4,8 @@
 """
 import unittest
 import sys
-from io import StringIO
 import re
+from io import StringIO
 from unittest.mock import patch
 from console import HBNBCommand
 from models import storage
