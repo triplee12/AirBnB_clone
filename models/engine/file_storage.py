@@ -46,3 +46,14 @@ class FileStorage:
                     self.new(eval(cls_name)(**o))
         except FileNotFoundError:
             return
+
+    def classes(self):
+        """Returns a dictionary of valid classes and their references"""
+        classes = {"BaseModel": BaseModel,
+                   "User": User,
+                   "State": State,
+                   "City"'': City,
+                   "Amenity": Amenity,
+                   "Place": Place,
+                   "Review": Review}
+        return classes
