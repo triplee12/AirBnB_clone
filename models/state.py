@@ -5,10 +5,10 @@ from models.base_model import BaseModel
 
 
 class State(BaseModel):
-    """Class defines state objects"""
-    
+    """Class defines state objects
+
     Attributes:
-        name (str): The name of the state.
+        name(str): The name of the state.
     """
 
     name = ""
