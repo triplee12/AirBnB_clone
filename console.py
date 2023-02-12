@@ -56,47 +56,77 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def default(self, line):
+        """Catch commands if nothing else matches then."""
+        # print("DEF:::", line)
+        self._precmd(line)
+
+    def _precmd(self, line):
+        """Intercepts commands to test for class.syntax()"""
+        # print("PRECMD:::", line)
+        match = re.search(r"^(\w*)\.(\w+)(?:\(([^)]*)\))$", line)
+        if not match:
+            return line
+        classname = match.group(1)
+        method = match.group(2)
+        args = match.group(3)
+        match_uid_and_args = re.search('^"([^"]*)"(?:, (.*))?$', args)
+        if match_uid_and_args:
+            uid = match_uid_and_args.group(1)
+            attr_or_dict = match_uid_and_args.group(2)
+        else:
+            uid = args
+            attr_or_dict = False
+
+        attr_and_value = ""
+        if method == "update" and attr_or_dict:
+            match_dict = re.search('^({.*})$', attr_or_dict)
+            if match_dict:
+                self.update_dict(classname, uid, match_dict.group(1))
+                return ""
+            match_attr_and_value = re.search(
+                '^(?:"([^"]*)")?(?:, (.*))?$', attr_or_dict)
+            if match_attr_and_value:
+                attr_and_value = (match_attr_and_value.group(
+                    1) or "") + " " + (match_attr_and_value.group(2) or "")
+        command = method + " " + classname + " " + uid + " " + attr_and_value
+        self.onecmd(command)
+        return command
+
+    def update_dict(self, classname, uid, s_dict):
+        """Helper method for update() with a dictionary."""
+        s = s_dict.replace("'", '"')
+        d = json.loads(s)
+        if not classname:
+            print("** class name missing **")
+        elif classname not in storage.classes():
+            print("** class doesn't exist **")
+        elif uid is None:
+            print("** instance id missing **")
+        else:
+            key = "{}.{}".format(classname, uid)
+            if key not in storage.all():
+                print("** no instance found **")
+            else:
+                attributes = storage.attributes()[classname]
+                for attribute, value in d.items():
+                    if attribute in attributes:
+                        value = attributes[attribute](value)
+                    setattr(storage.all()[key], attribute, value)
+                storage.all()[key].save()
+    
+    def do_count(self, line):
+        """Counts the instances of a class.
         """
-        [default method]
-
-        Args:
-            line ([str]): [user's input]
-
-        Returns:
-            [function]: [returns the function needed or error]
-        """
-        lst = (line.replace('(', '.').replace(',', '.').replace(' ', '')
-                [:-1].split('.'))
-        if len(lst) > 1:
-            if lst[1] == "all":
-                return self.do_all(lst[0])
-
-            elif lst[1] == "show":
-                return self.do_show(lst[0] + ' ' + lst[2].strip('"'))
-
-            elif lst[1] == "destory":
-                return self.do_destory(lst[0] + ' ' + lst[2].strip('"'))
-
-            elif lst[1] == "update":
-                print(len(lst))
-                if len(lst) == 6:
-                    return self.do_update(lst[0] + ' ' + lst[2].replace('"', '') 
-                            + ' ' + lst[3] + ' ' + lst[4])
-                else:
-                    dct = ""
-                    for i in range(3, len(lst)):
-                        dct += lst[i] + ","
-
-                    dct = dct[:-1] if dct[-1]==',' else dct
-                    to_dct = json.loads(dct)
-                    dct_cm = {k:v for k, v in to_dct.items()}
-                    for k, v in dct_cm.items():
-                        key = "{}.{}".format(lst[0], lst[2].strip('\"'))
-                        setattr(storage.all()[key], k, v)
-                        storage.save()
-
-            elif lst[1] == "count":
-                print(len(storage.all()))
+        words = line.split(' ')
+        if not words[0]:
+            print("** class name missing **")
+        elif words[0] not in HBNBCommand.classes.keys():
+            print("** class doesn't exist **")
+        else:
+            matches = [
+                k for k in storage.all() if k.startswith(
+                    words[0] + '.')]
+            print(len(matches))
 
     def do_create(self, line):
         """
@@ -182,35 +212,32 @@ class HBNBCommand(cmd.Cmd):
         if len(list_all):
             print(list_all)
 
-    def do_update(self, lines):
+    def do_update(self, args):
         """
         Update command for resetting user attributes
         """
-        line = lines.split()
         _all = storage.all()
-
-        if not line:
+        if len(args.split()) == 0:
             print("** class name missing **")
 
-        elif line[0] not in HBNBCommand.classes.keys():
+        elif args.split()[0] not in HBNBCommand.classes.keys():
             print("** class doesn't exist **")
 
-        elif len(lines.split()) == 1:
+        elif len(args.split()) == 1:
             print("** instance id missing **")
 
-        elif "{}.{}".format(lines.split()[0], lines.split()[1]) not in _all:
+        elif "{}.{}".format(args.split()[0], args.split()[1]) not in _all:
             print("** no instance found **")
 
-        elif len(lines.split()) == 2:
+        elif len(args.split()) == 2:
             print("** attribute name missing **")
 
-        elif len(lines.split()) == 3:
+        elif len(args.split()) == 3:
             print("** value missing **")
-
         else:
-            key = "{}.{}".format(lines.split()[0], lines.split()[1])
-            setattr(_all[key], lines.split()[2],
-                re.search(r'\w+', lines.split()[3]).group())
+            key = "{}.{}".format(args.split()[0], args.split()[1])
+            setattr(_all[key], args.split()[2],
+                    re.search(r'\w+', args.split()[3]).group())
             storage.save()
 
 
