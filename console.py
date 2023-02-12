@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """
-Command interpreter
+[HBNBCommand class]
 """
 import cmd
 import re
@@ -13,11 +13,13 @@ from models.city import City
 from models.amenity import Amenity
 from models.place import Place
 from models.review import Review
+from shlex import split
 
 
 class HBNBCommand(cmd.Cmd):
     """
-    Entery point of command interpreter
+    [HBNBCommand class]
+
     Args:
         cmd ([module]): [cmd module for command prompt]
     Returns:
@@ -37,28 +39,31 @@ class HBNBCommand(cmd.Cmd):
 
     def do_quit(self, line):
         """
-        Quits the command interpreter
+        Quit command to exit the program
         """
         return True
 
     def do_EOF(self, line):
-        """Exit the command interpreter"""
+        """
+        EOF command to exit the program
+        """
         return True
     
     def emptyline(self):
         """
-        Empty line
+        [Empty line]
         """
         pass
 
     def default(self, line):
         """
-        default method
+        [default method]
+
         Args:
-            line (str): user's input
+            line ([str]): [user's input]
 
         Returns:
-            function (function): returns the function needed or error
+            [function]: [returns the function needed or error]
         """
         lst = (line.replace('(', '.').replace(',', '.').replace(' ', '')
                 [:-1].split('.'))
@@ -75,7 +80,7 @@ class HBNBCommand(cmd.Cmd):
             elif lst[1] == "update":
                 print(len(lst))
                 if len(lst) == 6:
-                    return self.do_update(lst[0] + ' ' + lst[2].replace('"', '')
+                    return self.do_update(lst[0] + ' ' + lst[2].replace('"', '') 
                             + ' ' + lst[3] + ' ' + lst[4])
                 else:
                     dct = ""
@@ -93,12 +98,10 @@ class HBNBCommand(cmd.Cmd):
             elif lst[1] == "count":
                 print(len(storage.all()))
 
-        else:
-            print("*** Unknown syntax: {}".format(line))
-            return False
-
     def do_create(self, line):
-        """Creates a new instance of class."""
+        """
+        Create command a new instance
+        """
         line = line.split()
         if not line:
             print("** class name missing **")
@@ -113,8 +116,7 @@ class HBNBCommand(cmd.Cmd):
 
     def do_show(self, lines):
         """
-        Prints the string representation of an instance
-        based on the class name and id.
+        Show command print the dict format of instance
         """
         line = lines.split()
         _all = storage.all()
@@ -123,7 +125,7 @@ class HBNBCommand(cmd.Cmd):
             print("** class name missing **")
 
         elif line[0] not in HBNBCommand.classes.keys():
-            print("** class name doesn't exist **")
+            print("** class doesn't exist **")
 
         elif len(lines.split()) == 1:
             print("** instance id missing **")
@@ -134,10 +136,9 @@ class HBNBCommand(cmd.Cmd):
         else:
             print(_all["{}.{}".format(lines.split()[0], lines.split()[1])])
 
-    def do_destory(self, lines):
+    def do_destroy(self, lines):
         """
-        Deletes the instance from the database
-        using the given class and id.
+        Destroy command By ID
         """
         line = lines.split()
         _all = storage.all()
@@ -146,7 +147,7 @@ class HBNBCommand(cmd.Cmd):
             print("** class name missing **")
 
         elif line[0] not in HBNBCommand.classes.keys():
-            print("** class name doesn't exist **")
+            print("** class doesn't exist **")
 
         elif len(lines.split()) == 1:
             print("** instance id missing **")
@@ -159,14 +160,15 @@ class HBNBCommand(cmd.Cmd):
             storage.save()
 
     def do_all(self, line):
-        """Prints all string representation of all
-        instances based or not on the class name.
+        """
+        All command Prints all string representation of \
+            all instances based or not on the class name
         """
         line = line.split()
         list_all = []
 
         if line and line[0] not in HBNBCommand.classes.keys():
-            print("** class name doesn't exist **")
+            print("** class doesn't exist **")
 
         elif not line:
             for i in storage.all().values():
@@ -181,8 +183,8 @@ class HBNBCommand(cmd.Cmd):
             print(list_all)
 
     def do_update(self, lines):
-        """Updates an instance based on the class name and
-        id by adding or updating attribute.
+        """
+        Update command for resetting user attributes
         """
         line = lines.split()
         _all = storage.all()
